@@ -1,9 +1,12 @@
+import 'package:dartcheck/generators.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('', () {
-    test('', (){
-      expect(1, 1);
+    group('String', () {
+      forAll(Gen.string).test('Starts with', (s){
+        expect(s, s);
+      });
     });
   });
 }
