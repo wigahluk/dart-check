@@ -1,0 +1,14 @@
+name: dartcheck
+description: A monadic QuickCheck inspired library for Dart
+version: 0.1.0
+author: Oscar Ponce <wigahluk@gmail.com>
+homepage: https://github.com/wigahluk/dart-check
+
+environment:
+  sdk: '>=1.22.1 <2.0.0'
+
+dependencies:
+  meta: ^1.1.1
+
+dev_dependencies:
+  test: '>=0.12.0 <0.13.0'

@@ -1,9 +1,14 @@
+# Idea
+.idea
+*.iml
+
 # See https://www.dartlang.org/tools/private-files.html
 
 # Files and directories created by pub
 .packages
 .pub/
 build/
+
 # If you're building an application, you may want to check-in your pubspec.lock
 pubspec.lock
 
