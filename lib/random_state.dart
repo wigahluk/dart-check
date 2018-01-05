@@ -3,14 +3,13 @@ import 'package:dartcheck/rand.dart';
 import 'package:shuttlecock/shuttlecock.dart';
 
 ///
-typedef  Pair<T, Rand> RunState<T>(Rand rand);
+typedef Pair<T, Rand> RunState<T>(Rand rand);
 
 /// Represents a random execution context
 ///
 /// It is similar to the State monad but keeping a
 /// random seed under the context.
 class RandomState<T> extends Monad<T> {
-
   /// State is captured in function scope
   final RunState<T> run;
 
@@ -29,26 +28,24 @@ class RandomState<T> extends Monad<T> {
       });
 
   @override
-  RandomState<U> map<U>(Function1<T, U> f) =>
-      flatMap((t) => new RandomState.unit(f(t)));
-
-  @override
   RandomState<U> flatMap<U>(Function1<T, RandomState<U>> f) =>
       new RandomState((ran) {
         final p = run(ran);
         return f(p.first).run(p.second);
       });
 
+  @override
+  RandomState<U> map<U>(Function1<T, U> f) =>
+      flatMap((t) => new RandomState.unit(f(t)));
+
   /// Returns a new RandomState for boolean values.
-  static RandomState<bool> boolean() =>
-      new RandomState((ran) {
+  static RandomState<bool> boolean() => new RandomState((ran) {
         final p = ran.boolValue();
         return new Pair(p.first, p.second);
       });
 
   /// Returns a new RandomState for non negative integers.
-  static RandomState<int> nonNegativeInt() =>
-      new RandomState((ran) {
+  static RandomState<int> nonNegativeInt() => new RandomState((ran) {
         final p = ran.value();
         return new Pair(p.first, p.second);
       });

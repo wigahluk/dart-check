@@ -4,9 +4,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('Gen', () {
-
     group('Random Stream', () {
-
       test('two streams with same seed should emit same results', () async {
         final seed = new Rand();
         final g = Gen.chooseInt(10, 1000);
@@ -16,14 +14,14 @@ void main() {
       });
 
       test('two streams with different seed should emit different results',
-              () async {
-            final seed1 = new Rand();
-            final seed2 = seed1.next();
-            final g = Gen.chooseInt(10, 1000);
-            final s1 = await g.toStream(seed1).take(100).toList();
-            final s2 = await g.toStream(seed2).take(100).toList();
-            expect(s1, isNot(s2));
-          });
+          () async {
+        final seed1 = new Rand();
+        final seed2 = seed1.next();
+        final g = Gen.chooseInt(10, 1000);
+        final s1 = await g.toStream(seed1).take(100).toList();
+        final s2 = await g.toStream(seed2).take(100).toList();
+        expect(s1, isNot(s2));
+      });
     });
 
     test('unit wraps a value', () {
