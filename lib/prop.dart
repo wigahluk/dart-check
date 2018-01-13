@@ -26,11 +26,12 @@ class Prop<T> {
     // the proper values.
     var count = 0;
     dart_test.test(name, () async {
-      final tof = await _stream().take(100).map((t) {
+      // TODO: The number of generated cases should be configurable
+      final tryOrFailure = await _stream().take(100).map((t) {
         count++;
         return _tryOrFailure(tb, t);
       }).firstWhere((o) => o.isNotEmpty, defaultValue: () => new None());
-      _failDartTest(tof, count);
+      _failDartTest(tryOrFailure, count);
     });
   }
 
@@ -45,9 +46,10 @@ class Prop<T> {
     }
   }
 
-  static Option<dart_test.TestFailure> _tryOrFailure<T>(TestBody tb, T t) {
+  static Option<dart_test.TestFailure> _tryOrFailure<T>(
+      TestBody testBody, T t) {
     try {
-      tb(t);
+      testBody(t);
       return new None();
     } on dart_test.TestFailure catch (e) {
       return new Some(e);

@@ -12,6 +12,10 @@ class Rand {
   /// Produces a boolean with a new generator
   Pair<bool, Rand> boolValue() => new Pair(_nextBool(), next());
 
+  /// Produces a int in range with a new generator
+  Pair<int, Rand> chooseInt(int min, int max) =>
+      new Pair(_nextValueInRange(min, max), next());
+
   /// Produces a double with a new generator
   Pair<double, Rand> doubleValue() => new Pair(_nextDouble(), next());
 
@@ -21,9 +25,13 @@ class Rand {
   /// Produces the state of this generator
   Pair<int, Rand> value() => new Pair(_seed, next());
 
-  bool _nextBool() => new Random(_seed).nextBool();
+  bool _nextBool() => _seededRandom().nextBool();
 
-  double _nextDouble() => new Random(_seed).nextDouble();
+  double _nextDouble() => _seededRandom().nextDouble();
 
-  int _nextValue() => new Random(_seed).nextInt(pow(2, 32));
+  int _nextValue() => _seededRandom().nextInt(pow(2, 32));
+
+  int _nextValueInRange(min, max) => _seededRandom().nextInt(max - min) + min;
+
+  Random _seededRandom() => new Random(_seed);
 }

@@ -1,7 +1,7 @@
 dart-check
 ==========
 
-A library for using property checking techniques in the Dart language inspired by QuickCheck and ScalaCheck.
+A library for using property checking techniques in the Dart language inspired by [QuickCheck](https://hackage.haskell.org/package/QuickCheck) and [ScalaCheck](https://www.scalacheck.org/).
 
 ## Features
 
@@ -11,7 +11,7 @@ A library for using property checking techniques in the Dart language inspired b
 
 ## Usage
 
-Yoou can use `dart-check` similarly to the way you use tests right now with `dart.test`:
+You can use `dart-check` similarly to the way you use tests right now with `dart.test`:
 
 ```dart
 void main() {
@@ -29,8 +29,12 @@ The `forAll` function takes a _Generator_ and returns a _Property_ which has a m
 forAll :: Gen a -> Prop a
 ```
 
-An important difference is that, in contrast with regular `test` test void functions, `Property.test` uses a function that does takes arguments, this arguments correspond to the generators used to build the _Property_. 
+An important difference is that, in contrast with regular `Dart test` test void functions, `Property.test` uses a function that does takes arguments, this arguments correspond to the generators used to build the _Property_. 
 
+## Limitations
+
+* No shrinking functionality yet.
+* Random generators use `Dart.Random` internally which is not suitable for cryptographic purposes.
 
 ## Contributing
 
@@ -40,7 +44,7 @@ The steps are pretty much the same as in any other project:
 
 * Clone this repo:
     ```
-    $ git clon egit@github.com:wogahluk/dart-check.git
+    $ git clone git@github.com:wigahluk/dart-check.git
     ```
 * Get dependencies:
     ```

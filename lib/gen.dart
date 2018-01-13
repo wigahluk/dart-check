@@ -31,24 +31,23 @@ class Gen<T> extends Monad<T> {
   /// Returns a new generator for boolean values
   static Gen<bool> boolean() => new Gen(RandomState.boolean());
 
-  /// Returns a new generator for integer values greater than a given start
+  /// Returns a new generator for integer values greater or equal than a given start
   /// and less than a given end.
-  static Gen<int> chooseInt(int start, int exclusiveEnd) => new Gen(RandomState
-      .nonNegativeInt()
-      .map((n) => start + (n % (exclusiveEnd - start))));
+  static Gen<int> chooseInt(int start, int exclusiveEnd) =>
+      new Gen(RandomState.choseInt(start, exclusiveEnd));
 
   /// A static wrapper for unit constructor.
-  static Gen<S> cnst<S>(S s) => new GenConst.unit(s);
+  static Gen<S> cnst<S>(S s) => new _GenConst.unit(s);
 }
 
 /// Constant generator used as an optimization to avoid streams with several
 /// events when only one event is needed.
-class GenConst<T> extends Gen<T> {
+class _GenConst<T> extends Gen<T> {
   /// Creates a new generator given a random state as a sample.
-  GenConst(sample) : super(sample);
+  _GenConst(sample) : super(sample);
 
   /// Monadic unit.
-  factory GenConst.unit(T t) => new GenConst(new RandomState.unit(t));
+  factory _GenConst.unit(T t) => new _GenConst(new RandomState.unit(t));
 
   @override
   StreamMonad<T> toStream(Rand r) => new StreamMonad.of(sample.run(r).first);
