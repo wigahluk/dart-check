@@ -20,16 +20,16 @@ class Prop<T> {
   /// Used similar to the regular dart.test `test` function but receiving a
   /// function that takes arguments, namely, the ones produced randomly by this
   /// Property.
-  void test(String name, TestBody tb) {
+  void test(String name, TestBody testBody) {
     // We need to run everything within the Dart test closure as it keeps track
     // of global state variables and can fail if asserts are executed without
     // the proper values.
     var count = 0;
     dart_test.test(name, () async {
       // TODO: The number of generated cases should be configurable
-      final tryOrFailure = await _stream().take(100).map((t) {
+      final tryOrFailure = await _stream().take(100).map((genValue) {
         count++;
-        return _tryOrFailure(tb, t);
+        return _tryOrFailure(testBody, genValue);
       }).firstWhere((o) => o.isNotEmpty, defaultValue: () => new None());
       _failDartTest(tryOrFailure, count);
     });
@@ -42,6 +42,7 @@ class Prop<T> {
     if (failure.isNotEmpty) {
       final newMessage =
           '${failure.first.message}\n(Failed after $attemptCount attempts)';
+      // TODO: wrap original Failure to avoid loosing any context.
       throw new dart_test.TestFailure(newMessage); // ignore: only_throw_errors
     }
   }
