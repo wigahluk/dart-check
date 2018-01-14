@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   meta: ^1.1.1
+  shuttlecock: ^0.4.1
 
 dev_dependencies:
   test: '>=0.12.0 <0.13.0'
