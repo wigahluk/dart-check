@@ -9,6 +9,13 @@ class Rand {
   // ignore: public_member_api_docs
   Rand({seed: 1}) : _seed = seed;
 
+  @override
+  int get hashCode => _seed.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || other is Rand && other._seed == _seed;
+
   /// Produces a boolean with a new generator
   Pair<bool, Rand> boolValue() => new Pair(_nextBool(), next());
 

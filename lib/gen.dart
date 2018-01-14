@@ -31,8 +31,8 @@ class Gen<T> extends Monad<T> {
   /// Returns a new generator for boolean values
   static Gen<bool> boolean() => new Gen(RandomState.boolean());
 
-  /// Returns a new generator for integer values greater or equal than a given start
-  /// and less than a given end.
+  /// Returns a new generator for integer values greater or equal than a given
+  /// start and less than a given end.
   static Gen<int> chooseInt(int start, int exclusiveEnd) =>
       new Gen(RandomState.choseInt(start, exclusiveEnd));
 
