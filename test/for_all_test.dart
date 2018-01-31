@@ -13,6 +13,10 @@ void main() {
       expect(n, lessThan(101));
       expect(n, greaterThan(9));
     });
+
+//    forAll(Gen.chooseInt(0, 100)).test('fail is less than one', (n) {
+//      expect(n, lessThan(1));
+//    });
   });
 
   group('Constant', () {

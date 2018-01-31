@@ -21,39 +21,47 @@ class Prop<T> {
   /// function that takes arguments, namely, the ones produced randomly by this
   /// Property.
   void test(String name, TestBody testBody) {
+    var count = 0;
     // We need to run everything within the Dart test closure as it keeps track
     // of global state variables and can fail if asserts are executed without
     // the proper values.
-    var count = 0;
     dart_test.test(name, () async {
       // TODO: The number of generated cases should be configurable
       final tryOrFailure = await _stream().take(100).map((genValue) {
         count++;
         return _tryOrFailure(testBody, genValue);
       }).firstWhere((o) => o.isNotEmpty, defaultValue: () => new None());
+
       _failDartTest(tryOrFailure, count);
     });
   }
 
   StreamMonad<T> _stream() => _gen.toStream(new Rand());
 
-  static void _failDartTest(
-      Option<dart_test.TestFailure> failure, int attemptCount) {
-    if (failure.isNotEmpty) {
-      final newMessage =
-          '${failure.first.message}\n(Failed after $attemptCount attempts)';
-      // TODO: wrap original Failure to avoid loosing any context.
-      throw new dart_test.TestFailure(newMessage); // ignore: only_throw_errors
-    }
-  }
-
-  static Option<dart_test.TestFailure> _tryOrFailure<T>(
-      TestBody testBody, T t) {
+  Option<_TestFailure<T>> _tryOrFailure(TestBody testBody, T t) {
     try {
       testBody(t);
       return new None();
     } on dart_test.TestFailure catch (e) {
-      return new Some(e);
+      return new Some(new _TestFailure(t, e));
     }
   }
+
+  static void _failDartTest(Option<_TestFailure> failure, int attemptCount) {
+    if (failure.isNotEmpty) {
+      // ignore: only_throw_errors
+      throw failure.first
+          .failedAfter(attemptCount);
+    }
+  }
+}
+
+class _TestFailure<T> {
+  final T _value;
+  final dart_test.TestFailure _failure;
+
+  _TestFailure(this._value, this._failure);
+
+  dart_test.TestFailure failedAfter(int count) => new dart_test.TestFailure(
+      '${_failure.message}\n(Failed after $count attempts)');
 }

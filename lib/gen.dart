@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dartcheck/rand.dart';
 import 'package:dartcheck/random_state.dart';
 import 'package:shuttlecock/shuttlecock.dart';
@@ -23,32 +25,65 @@ class Gen<T> extends Monad<T> {
   @override
   Gen<U> map<U>(Function1<T, U> f) => new Gen(sample.map(f));
 
+  /// Generates a stream of shrinked values given a target value.
+  /// If no implementation is provided, the stream will be empty.
+  StreamMonad<T> shrink(T t) => new StreamMonad.empty();
+
   /// Generates an infinite stream of vales given a generator and a random seed.
   StreamMonad<T> toStream(Rand r) => new StreamMonad.unfoldOf(
           sample.run(r), (p) => new Option(sample.run(p.second)))
       .map((p) => p.first);
 
   /// Returns a new generator for boolean values
-  static Gen<bool> boolean() => new Gen(RandomState.boolean());
+  static Gen<bool> boolean() => new _GenBool();
 
   /// Returns a new generator for integer values greater or equal than a given
   /// start and less than a given end.
   static Gen<int> chooseInt(int start, int exclusiveEnd) =>
-      new Gen(RandomState.choseInt(start, exclusiveEnd));
+      new _GenIntInRange(start, exclusiveEnd);
 
   /// A static wrapper for unit constructor.
-  static Gen<S> cnst<S>(S s) => new _GenConst.unit(s);
+  static Gen<S> cnst<S>(S s) => new _GenConst(s);
+}
+
+class _GenBool extends Gen<bool> {
+  /// Creates a new generator given a random state as a sample.
+  _GenBool() : super(RandomState.boolean());
+
+  @override
+  StreamMonad<bool> toStream(Rand r) =>
+      new StreamMonad(new Stream.fromIterable([true, false]));
 }
 
 /// Constant generator used as an optimization to avoid streams with several
 /// events when only one event is needed.
 class _GenConst<T> extends Gen<T> {
-  /// Creates a new generator given a random state as a sample.
-  _GenConst(sample) : super(sample);
+  final T _value;
 
-  /// Monadic unit.
-  factory _GenConst.unit(T t) => new _GenConst(new RandomState.unit(t));
+  /// Creates a new generator given a random state as a sample.
+  _GenConst(T value)
+      : this._value = value,
+        super(new RandomState.unit(value));
 
   @override
-  StreamMonad<T> toStream(Rand r) => new StreamMonad.of(sample.run(r).first);
+  StreamMonad<T> toStream(Rand r) => new StreamMonad.of(_value);
+}
+
+class _GenIntInRange extends Gen<int> {
+  final int _start;
+  final int _exclusiveEnd;
+  _GenIntInRange(int start, int exclusiveEnd)
+      : _start = start,
+        _exclusiveEnd = exclusiveEnd,
+        super(RandomState.choseInt(start, exclusiveEnd));
+
+  @override
+  StreamMonad<int> shrink(int target) => target == _start
+      ? new StreamMonad.empty()
+      : new StreamMonad.of(_start).unfold(_shrinkStep);
+
+  Option<int> _shrinkStep(int step) {
+    final newStep = ((_exclusiveEnd + step) / 2).ceil();
+    return newStep >= _exclusiveEnd ? new None() : new Some(newStep);
+  }
 }
