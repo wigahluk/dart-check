@@ -36,7 +36,7 @@ class Prop<T> {
         return _tryOrFailure(testBody, genValue);
       }).firstWhere((o) => o.isNotEmpty, defaultValue: () => new None());
 
-      _failDartTest(shrinker, tryOrFailure, count);
+      await _failDartTest(shrinker, tryOrFailure, count);
     });
   }
 
