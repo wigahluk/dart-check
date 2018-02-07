@@ -155,10 +155,10 @@ void main() {
         final g = Gen.chooseInt(10, 100);
         final s = await g.shrink(15).toList()
           ..forEach((item) {
-            expect(item, inInclusiveRange(10, 99));
+            expect(item, inInclusiveRange(10, 14));
           });
-        expect(s[0], 10);
-        expect(s.length, 7);
+        expect(s, [10, 13, 14]);
+        expect(s.length, 3);
       });
     });
 

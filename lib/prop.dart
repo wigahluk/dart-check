@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:dartcheck/gen.dart';
+import 'package:dartcheck/pair.dart';
 import 'package:dartcheck/rand.dart';
 import 'package:shuttlecock/shuttlecock.dart';
 import 'package:test/test.dart' as dart_test;
@@ -22,6 +25,7 @@ class Prop<T> {
   /// Property.
   void test(String name, TestBody testBody) {
     var count = 0;
+    final shrinker = new _TestShrinker(testBody, _gen);
     // We need to run everything within the Dart test closure as it keeps track
     // of global state variables and can fail if asserts are executed without
     // the proper values.
@@ -32,7 +36,7 @@ class Prop<T> {
         return _tryOrFailure(testBody, genValue);
       }).firstWhere((o) => o.isNotEmpty, defaultValue: () => new None());
 
-      _failDartTest(tryOrFailure, count);
+      _failDartTest(shrinker, tryOrFailure, count);
     });
   }
 
@@ -47,21 +51,52 @@ class Prop<T> {
     }
   }
 
-  static void _failDartTest(Option<_TestFailure> failure, int attemptCount) {
+  static Future<Null> _failDartTest(_TestShrinker shrinker,
+      Option<_TestFailure> failure, int attemptCount) async {
     if (failure.isNotEmpty) {
+      final newFailure = await shrinker.improve(failure.first, 10);
+
       // ignore: only_throw_errors
-      throw failure.first
-          .failedAfter(attemptCount);
+      throw newFailure.failedAfter(attemptCount);
     }
   }
 }
 
 class _TestFailure<T> {
-  final T _value;
+  final T value;
   final dart_test.TestFailure _failure;
 
-  _TestFailure(this._value, this._failure);
+  _TestFailure(this.value, this._failure);
 
   dart_test.TestFailure failedAfter(int count) => new dart_test.TestFailure(
       '${_failure.message}\n(Failed after $count attempts)');
+}
+
+class _TestShrinker<T> {
+  final TestBody<T> testBody;
+  final Gen<T> gen;
+  _TestShrinker(this.testBody, this.gen);
+
+  FutureMonad<_TestFailure<T>> improve(_TestFailure<T> t, int count) =>
+      count <= 0
+          ? new FutureMonad.of(t)
+          : improveStep(t).map((p) =>
+              p.second.isEmpty ? p.first : improve(p.second.first, count - 1));
+
+  FutureMonad<Pair<_TestFailure<T>, Option<_TestFailure<T>>>> improveStep(
+          _TestFailure<T> t) =>
+      gen
+          .shrink(t.value)
+          .map(runOnce)
+          .firstWhere((o) => o.isNotEmpty, defaultValue: () => new None())
+          .map((o) => new Pair(t, o));
+
+  Option<_TestFailure<T>> runOnce(T t) {
+    try {
+      testBody(t);
+      return new None();
+    } on dart_test.TestFailure catch (e) {
+      return new Some(new _TestFailure(t, e));
+    }
+  }
 }

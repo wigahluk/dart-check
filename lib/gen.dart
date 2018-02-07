@@ -71,19 +71,17 @@ class _GenConst<T> extends Gen<T> {
 
 class _GenIntInRange extends Gen<int> {
   final int _start;
-  final int _exclusiveEnd;
   _GenIntInRange(int start, int exclusiveEnd)
       : _start = start,
-        _exclusiveEnd = exclusiveEnd,
         super(RandomState.choseInt(start, exclusiveEnd));
 
   @override
   StreamMonad<int> shrink(int target) => target == _start
       ? new StreamMonad.empty()
-      : new StreamMonad.of(_start).unfold(_shrinkStep);
+      : new StreamMonad.of(_start).unfold((step) => _shrinkStep(target, step));
 
-  Option<int> _shrinkStep(int step) {
-    final newStep = ((_exclusiveEnd + step) / 2).ceil();
-    return newStep >= _exclusiveEnd ? new None() : new Some(newStep);
+  Option<int> _shrinkStep(int target, int step) {
+    final newStep = ((target + step) / 2).ceil();
+    return newStep >= target ? new None() : new Some(newStep);
   }
 }

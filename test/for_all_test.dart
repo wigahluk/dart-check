@@ -13,9 +13,9 @@ void main() {
       expect(n, lessThan(101));
       expect(n, greaterThan(9));
     });
-
+//  Uncomment this test to see it fail.
 //    forAll(Gen.chooseInt(0, 100)).test('fail is less than one', (n) {
-//      expect(n, lessThan(1));
+//      expect(n, lessThan(5));
 //    });
   });
 
