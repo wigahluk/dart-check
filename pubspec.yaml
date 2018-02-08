@@ -5,11 +5,11 @@ author: Oscar Ponce <wigahluk@gmail.com>
 homepage: https://github.com/wigahluk/dart-check
 
 environment:
-  sdk: '>=1.22.1 <2.0.0'
+  sdk: '2.0.0-dev.20.0'
 
 dependencies:
   meta: ^1.1.1
-  shuttlecock: ^0.4.1
+  shuttlecock: ^0.4.6-dev
   quiver_hashcode: '>=1.0.0-dev.1 <1.1.0'
 
 dev_dependencies:

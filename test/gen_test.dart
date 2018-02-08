@@ -136,37 +136,65 @@ void main() {
       });
     });
 
-    test('unit wraps a value', () {
-      final value = 'hello monad';
-      final seed = new Rand();
-      final one = new Gen.unit(value);
-      expect(one.sample.run(seed).first, value);
+    group('Srinkers', () {
+      test('Boolean shrinking', () async {
+        final g = Gen.boolean();
+        final s1 = await g.shrink(true).toList();
+        final s2 = await g.shrink(false).toList();
+        expect(s1.length, 0);
+        expect(s2.length, 0);
+      });
+
+      test('Constant shrinking', () async {
+        final g = Gen.cnst(10);
+        final s = await g.shrink(15).toList();
+        expect(s.length, 0);
+      });
+
+      test('Int in range shrinking', () async {
+        final g = Gen.chooseInt(10, 100);
+        final s = await g.shrink(15).toList()
+          ..forEach((item) {
+            expect(item, inInclusiveRange(10, 14));
+          });
+        expect(s, [10, 13, 14]);
+        expect(s.length, 3);
+      });
     });
 
-    test('cnst is the same as unit', () {
-      final value = 'hello monad';
-      final seed = new Rand();
-      final one = Gen.cnst(value);
-      expect(one.sample.run(seed).first, value);
-    });
+    group('Generators', () {
+      test('unit wraps a value', () {
+        final value = 'hello monad';
+        final seed = new Rand();
+        final one = new Gen.unit(value);
+        expect(one.sample.run(seed).first, value);
+      });
 
-    test('boolean generates booleans', () {
-      final seed1 = new Rand();
-      final seed2 = seed1.next();
-      final g = Gen.boolean();
-      // We are lucky and the first two seeds generate two different booleans :)
-      expect(g.sample.run(seed1).first, true);
-      expect(g.sample.run(seed2).first, false);
-    });
+      test('cnst is the same as unit', () {
+        final value = 'hello monad';
+        final seed = new Rand();
+        final one = Gen.cnst(value);
+        expect(one.sample.run(seed).first, value);
+      });
 
-    /// This test is actually only testing the first value of the generator and
-    /// is only used for testing basic behavior. Real tests should use Props
-    /// with multiple generators.
-    test('chooseInt generates integers in range', () {
-      final seed1 = new Rand();
-      final g = Gen.chooseInt(10, 1000);
-      expect(g.sample.run(seed1).first, greaterThan(9));
-      expect(g.sample.run(seed1).first, lessThan(1000));
+      test('boolean generates booleans', () {
+        final seed1 = new Rand();
+        final seed2 = seed1.next();
+        final g = Gen.boolean();
+        // We are lucky and the first two seeds generate two different booleans :)
+        expect(g.sample.run(seed1).first, true);
+        expect(g.sample.run(seed2).first, false);
+      });
+
+      /// This test is actually only testing the first value of the generator and
+      /// is only used for testing basic behavior. Real tests should use Props
+      /// with multiple generators.
+      test('chooseInt generates integers in range', () {
+        final seed1 = new Rand();
+        final g = Gen.chooseInt(10, 1000);
+        expect(g.sample.run(seed1).first, greaterThan(9));
+        expect(g.sample.run(seed1).first, lessThan(1000));
+      });
     });
   });
 }
