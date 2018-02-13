@@ -1,13 +1,13 @@
 dart-check
 ==========
 
-A library for using property checking techniques in the Dart language inspired by [QuickCheck](https://hackage.haskell.org/package/QuickCheck) and [ScalaCheck](https://www.scalacheck.org/).
+An experimental library for using property checking techniques in the Dart language inspired by [QuickCheck](https://hackage.haskell.org/package/QuickCheck) and [ScalaCheck](https://www.scalacheck.org/).
 
 ## Features
 
 * Works with `dart.test` framework and incorporates a similar syntax to it.
-* Random values are reproducible as QuickCheck or ScalaCheck.
-* Monadic generators featuring **shuttlecock** Monad contract. 
+* Random values are reproducible as **QuickCheck** or **ScalaCheck**.
+* Monadic generators featuring **shuttlecock** _Monad_ contract. 
 
 ## Usage
 
@@ -29,12 +29,13 @@ The `forAll` function takes a _Generator_ and returns a _Property_ which has a m
 forAll :: Gen a -> Prop a
 ```
 
-An important difference is that, in contrast with regular `Dart test` test void functions, `Property.test` uses a function that does takes arguments, this arguments correspond to the generators used to build the _Property_. 
+An important difference is that, in contrast with regular `Dart test` test void functions, `Property.test` uses a function that does take one argument, this argument correspond to the generator used to build the _Property_. 
 
 ## Limitations
 
-* No shrinking functionality yet.
-* Random generators use `Dart.Random` internally which is not suitable for cryptographic purposes.
+* Limited number of generators.
+* Number of cases and shrinking steps are not yet configurable.
+* Random generators use `Dart.Random` internally which is not suitable for cryptographic purposes. I can't think on any reason why this would be an issue, but if it is, you'll probably want to use some other tool.
 
 ## Contributing
 
