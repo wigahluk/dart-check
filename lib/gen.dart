@@ -43,13 +43,26 @@ class Gen<T> extends Monad<T> {
       chooseInt('a'.codeUnitAt(0), 'z'.codeUnitAt(0) + 1)
           .map((n) => new String.fromCharCode(n));
 
+  /// Returns a generator for lower case alpha strings.
+  static Gen<String> alphaLowerStr([int size = 100]) =>
+      listOfN(alphaLowerChar(), size + 1).map((chars) => chars.join(''));
+
   /// Returns a generator for upper case alpha characters.
   static Gen<String> alphaUpperChar() =>
       chooseInt('A'.codeUnitAt(0), 'Z'.codeUnitAt(0) + 1)
           .map((n) => new String.fromCharCode(n));
 
+  /// Returns a generator for upper case alpha strings.
+  static Gen<String> alphaUpperStr([int size = 100]) =>
+      listOfN(alphaUpperChar(), size + 1).map((chars) => chars.join(''));
+
   /// Returns a new generator for boolean values
   static Gen<bool> boolean() => new _GenBool();
+
+  /// Returns a new generator for double values greater or equal than a given
+  /// start and less than a given end.
+  static Gen<double> chooseDouble(double start, double exclusiveEnd) =>
+      new _GenDoubleInRange(start, exclusiveEnd);
 
   /// Returns a new generator for integer values greater or equal than a given
   /// start and less than a given end.
@@ -59,10 +72,20 @@ class Gen<T> extends Monad<T> {
   /// A static wrapper for unit constructor.
   static Gen<S> cnst<S>(S s) => new _GenConst(s);
 
+  /// Returns a generator of lists of T with at most a limit number of elements
+  /// given a Generator.
+  static Gen<List<T>> listOfN<T>(Gen<T> gen, int limit) =>
+      chooseInt(0, limit + 1)
+          .flatMap((count) => sequence(new List.filled(count, gen)));
+
   /// Returns a generator for numerical characters.
   static Gen<String> numChar() =>
       chooseInt('0'.codeUnitAt(0), '57'.codeUnitAt(0) + 1)
           .map((n) => new String.fromCharCode(n));
+
+  /// Returns a generator for numerical strings.
+  static Gen<String> numStr([int size = 100]) =>
+      listOfN(numChar(), size + 1).map((chars) => chars.join(''));
 
   /// Returns a generator given a collection of generators
   static Gen<List<T>> sequence<T>(Iterable<Gen<T>> gens) => gens.isEmpty
@@ -96,6 +119,24 @@ class _GenConst<T> extends Gen<T> {
 
   @override
   StreamMonad<T> toStream(Rand r) => new StreamMonad.of(_value);
+}
+
+class _GenDoubleInRange extends Gen<double> {
+  final double _start;
+
+  _GenDoubleInRange(double start, double exclusiveEnd)
+      : _start = start,
+        super(RandomState.choseDouble(start, exclusiveEnd));
+
+  @override
+  StreamMonad<double> shrink(double target) => target == _start
+      ? new StreamMonad.empty()
+      : new StreamMonad.of(_start).unfold((step) => _shrinkStep(target, step));
+
+  Option<double> _shrinkStep(double target, double step) {
+    final newStep = (target + step) / 2;
+    return newStep >= target ? new None() : new Some(newStep);
+  }
 }
 
 class _GenIntInRange extends Gen<int> {

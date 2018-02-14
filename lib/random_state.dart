@@ -39,23 +39,26 @@ class RandomState<T> extends Monad<T> {
       flatMap((t) => new RandomState.unit(f(t)));
 
   /// Returns a new RandomState for boolean values.
-  static RandomState<bool> boolean() => new RandomState((ran) {
-        final p = ran.boolValue();
-        return new Pair(p.first, p.second);
+  static RandomState<bool> boolean() =>
+      new RandomState((ran) => ran.boolValue());
+
+  /// Returns a new RandomState for non negative doubles between zero and 1.
+  static RandomState<double> choseDouble(
+          [double min = 0.0, double max = 1.0]) =>
+      new RandomState((ran) {
+        final delta = max - min;
+        final p = ran.doubleValue();
+        return new Pair(p.first * delta + min, p.second);
       });
 
   /// Returns a new RandomState for non integers in a range.
-  static RandomState<int> choseInt(int min, int max) => new RandomState((ran) {
-        final p = ran.chooseInt(min, max);
-        return new Pair(p.first, p.second);
-      });
+  static RandomState<int> choseInt(int min, int max) =>
+      new RandomState((ran) => ran.chooseInt(min, max));
 
   /// Returns a new RandomState for non negative integers.
   ///
   /// This implementation relies on the fact that Random.nextInt
   /// on the Dart SDK returns non negative values.
-  static RandomState<int> nonNegativeInt() => new RandomState((ran) {
-        final p = ran.value();
-        return new Pair(p.first, p.second);
-      });
+  static RandomState<int> nonNegativeInt() =>
+      new RandomState((ran) => ran.value());
 }

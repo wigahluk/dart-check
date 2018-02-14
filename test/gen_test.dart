@@ -196,6 +196,19 @@ void main() {
         }
       });
 
+      test('chooseDouble generates dpubles in range', () async {
+        final seed = new Rand();
+        final values = await Gen
+            .chooseDouble(10.0, 1000.0)
+            .toStream(seed)
+            .take(100)
+            .toList();
+        for (var v in values) {
+          expect(v, greaterThan(9));
+          expect(v, lessThan(1000));
+        }
+      });
+
       test('sequence of two generators is a generator of a pair', () async {
         final seed = new Rand();
         final gen1 = Gen.chooseInt(1, 101);
@@ -207,6 +220,21 @@ void main() {
           expect(v[0], lessThan(101));
           expect(v[1], greaterThan(100));
           expect(v[1], lessThan(201));
+          expect(v.length, 2);
+        }
+      });
+
+      test('Sequence of T with listOfN', () async {
+        final seed = new Rand();
+        final gen = Gen.chooseInt(1, 101);
+        final values =
+            await Gen.listOfN(gen, 10).toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v.length, lessThan(11));
+          for (var c in v) {
+            expect(c, lessThan(101));
+            expect(c, greaterThan(0));
+          }
         }
       });
     });
@@ -238,6 +266,34 @@ void main() {
         for (var v in values) {
           expect(v, matches('[a-z]'));
           expect(v.length, 1);
+        }
+      });
+    });
+
+    group('String Generators', () {
+      test('Numeric string', () async {
+        final seed = new Rand();
+        final values = await Gen.numStr().toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v, matches('^[0-9]*\$'));
+        }
+      });
+
+      test('Alpha upper string', () async {
+        final seed = new Rand();
+        final values =
+            await Gen.alphaUpperStr().toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v, matches('^[A-Z]*\$'));
+        }
+      });
+
+      test('Alpha lower string', () async {
+        final seed = new Rand();
+        final values =
+            await Gen.alphaLowerStr().toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v, matches('^[a-z]*\$'));
         }
       });
     });
