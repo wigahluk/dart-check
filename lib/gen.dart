@@ -65,19 +65,14 @@ class Gen<T> extends Monad<T> {
           .map((n) => new String.fromCharCode(n));
 
   /// Returns a generator given a collection of generators
-  static Gen<List<T>> sequence<T>(List<Gen<T>> gens) {
-    if (gens.isEmpty) {
-      return cnst([]);
-    }
-    final initial = gens.first.sample.map((t) => [t]);
-    final state = gens.skip(1).fold(
-        initial,
-        (acc, gen) => acc.flatMap((t1) => gen.sample.map((t2) {
-              t1.add(t2);
-              return t1;
-            })));
-    return new Gen(state);
-  }
+  static Gen<List<T>> sequence<T>(Iterable<Gen<T>> gens) => gens.isEmpty
+      ? cnst([])
+      : gens.skip(1).fold(
+          gens.first.map((t) => [t]),
+          (acc, gen) => acc.flatMap((ts) => gen.map((t2) {
+                ts.add(t2);
+                return ts;
+              })));
 }
 
 class _GenBool extends Gen<bool> {
