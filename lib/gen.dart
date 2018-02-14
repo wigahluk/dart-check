@@ -34,6 +34,20 @@ class Gen<T> extends Monad<T> {
           sample.run(r), (p) => new Option(sample.run(p.second)))
       .map((p) => p.first);
 
+  ///------------///
+  /// Generators ///
+  ///------------///
+
+  /// Returns a generator for lower case alpha characters.
+  static Gen<String> alphaLowerChar() =>
+      chooseInt('a'.codeUnitAt(0), 'z'.codeUnitAt(0) + 1)
+          .map((n) => new String.fromCharCode(n));
+
+  /// Returns a generator for upper case alpha characters.
+  static Gen<String> alphaUpperChar() =>
+      chooseInt('A'.codeUnitAt(0), 'Z'.codeUnitAt(0) + 1)
+          .map((n) => new String.fromCharCode(n));
+
   /// Returns a new generator for boolean values
   static Gen<bool> boolean() => new _GenBool();
 
@@ -44,6 +58,21 @@ class Gen<T> extends Monad<T> {
 
   /// A static wrapper for unit constructor.
   static Gen<S> cnst<S>(S s) => new _GenConst(s);
+
+  /// Returns a generator for numerical characters.
+  static Gen<String> numChar() =>
+      chooseInt('0'.codeUnitAt(0), '57'.codeUnitAt(0) + 1)
+          .map((n) => new String.fromCharCode(n));
+
+  /// Returns a generator given a collection of generators
+  static Gen<List<T>> sequence<T>(Iterable<Gen<T>> gens) => gens.isEmpty
+      ? cnst([])
+      : gens.skip(1).fold(
+          gens.first.map((t) => [t]),
+          (acc, gen) => acc.flatMap((ts) => gen.map((t2) {
+                ts.add(t2);
+                return ts;
+              })));
 }
 
 class _GenBool extends Gen<bool> {
@@ -71,6 +100,7 @@ class _GenConst<T> extends Gen<T> {
 
 class _GenIntInRange extends Gen<int> {
   final int _start;
+
   _GenIntInRange(int start, int exclusiveEnd)
       : _start = start,
         super(RandomState.choseInt(start, exclusiveEnd));

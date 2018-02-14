@@ -162,7 +162,7 @@ void main() {
       });
     });
 
-    group('Generators', () {
+    group('Basic Generators', () {
       test('unit wraps a value', () {
         final value = 'hello monad';
         final seed = new Rand();
@@ -186,14 +186,59 @@ void main() {
         expect(g.sample.run(seed2).first, false);
       });
 
-      /// This test is actually only testing the first value of the generator and
-      /// is only used for testing basic behavior. Real tests should use Props
-      /// with multiple generators.
-      test('chooseInt generates integers in range', () {
-        final seed1 = new Rand();
-        final g = Gen.chooseInt(10, 1000);
-        expect(g.sample.run(seed1).first, greaterThan(9));
-        expect(g.sample.run(seed1).first, lessThan(1000));
+      test('chooseInt generates integers in range', () async {
+        final seed = new Rand();
+        final values =
+            await Gen.chooseInt(10, 1000).toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v, greaterThan(9));
+          expect(v, lessThan(1000));
+        }
+      });
+
+      test('sequence of two generators is a generator of a pair', () async {
+        final seed = new Rand();
+        final gen1 = Gen.chooseInt(1, 101);
+        final gen2 = Gen.chooseInt(101, 200);
+        final values =
+            await Gen.sequence([gen1, gen2]).toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v[0], greaterThan(0));
+          expect(v[0], lessThan(101));
+          expect(v[1], greaterThan(100));
+          expect(v[1], lessThan(201));
+        }
+      });
+    });
+
+    group('Character Generators', () {
+      test('charNum generates one numeric char', () async {
+        final seed = new Rand();
+        final values = await Gen.numChar().toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v, matches('[0-9]'));
+          expect(v.length, 1);
+        }
+      });
+
+      test('alphaUpperChar generates one upper case alpha char', () async {
+        final seed = new Rand();
+        final values =
+            await Gen.alphaUpperChar().toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v, matches('[A-Z]'));
+          expect(v.length, 1);
+        }
+      });
+
+      test('alphaLowerChar generates one lower case alpha char', () async {
+        final seed = new Rand();
+        final values =
+            await Gen.alphaLowerChar().toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v, matches('[a-z]'));
+          expect(v.length, 1);
+        }
       });
     });
   });

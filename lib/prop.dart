@@ -9,7 +9,7 @@ import 'package:test/test.dart' as dart_test;
 /// Returns a new Prop that can be used to run tests for a generator
 Prop forAll<T>(Gen<T> gen) => new Prop(gen);
 
-/// Type alias for tes bodies.
+/// Type alias for test bodies.
 typedef void TestBody<T>(T s);
 
 /// Property representation to be verified
