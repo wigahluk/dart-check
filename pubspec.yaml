@@ -5,7 +5,7 @@ author: Oscar Ponce <wigahluk@gmail.com>
 homepage: https://github.com/wigahluk/dart-check
 
 environment:
-  sdk: '2.0.0-dev.20.0'
+  sdk: '^2.0.0-dev.20.0'
 
 dependencies:
   meta: ^1.1.1

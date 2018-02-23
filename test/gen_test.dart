@@ -204,7 +204,7 @@ void main() {
             .take(100)
             .toList();
         for (var v in values) {
-          expect(v, greaterThan(9));
+          expect(v, greaterThanOrEqualTo(10));
           expect(v, lessThan(1000));
         }
       });
@@ -232,7 +232,7 @@ void main() {
         for (var v in values) {
           expect(v.length, lessThan(11));
           for (var c in v) {
-            expect(c, lessThan(101));
+            expect(c, lessThanOrEqualTo(100));
             expect(c, greaterThan(0));
           }
         }
