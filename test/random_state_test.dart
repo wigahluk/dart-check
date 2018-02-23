@@ -123,21 +123,21 @@ void main() {
       final value = 'hello monad';
       final seed = new Rand();
       final one = new RandomState.unit(value);
-      expect(one.run(seed).first, value);
+      expect(one.run(seed).item1, value);
     });
 
     test('map identity', () {
       final seed = new Rand();
       final one = new RandomState.unit('hello monad');
       final two = one.map((a) => a);
-      expect(one.run(seed).first, two.run(seed).first);
+      expect(one.run(seed).item1, two.run(seed).item1);
     });
 
     test('unit is flatMap identity', () {
       final seed = new Rand();
       final one = new RandomState.unit('hello monad');
       final two = one.flatMap((a) => new RandomState.unit(a));
-      expect(one.run(seed).first, two.run(seed).first);
+      expect(one.run(seed).item1, two.run(seed).item1);
     });
   });
 }

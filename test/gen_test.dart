@@ -1,5 +1,5 @@
 import 'package:dartcheck/gen.dart';
-import 'package:dartcheck/pair.dart';
+import 'package:tuple/tuple.dart';
 import 'package:dartcheck/rand.dart';
 import 'package:shuttlecock/shuttlecock.dart';
 import 'package:test/test.dart';
@@ -14,7 +14,7 @@ void main() {
       final referenceRand = new Rand();
 
       // Runs a generator on the first generated value of the referenceRand.
-      Pair<T, Rand> runGen<T>(Gen<T> gen) => gen.sample.run(referenceRand);
+      Tuple2<T, Rand> runGen<T>(Gen<T> gen) => gen.sample.run(referenceRand);
 
       group('applicative', () {
         test('pure identity', () {
@@ -167,14 +167,14 @@ void main() {
         final value = 'hello monad';
         final seed = new Rand();
         final one = new Gen.unit(value);
-        expect(one.sample.run(seed).first, value);
+        expect(one.sample.run(seed).item1, value);
       });
 
       test('cnst is the same as unit', () {
         final value = 'hello monad';
         final seed = new Rand();
         final one = Gen.cnst(value);
-        expect(one.sample.run(seed).first, value);
+        expect(one.sample.run(seed).item1, value);
       });
 
       test('boolean generates booleans', () {
@@ -182,8 +182,8 @@ void main() {
         final seed2 = seed1.next();
         final g = Gen.boolean();
         // We are lucky and the first two seeds generate two different booleans :)
-        expect(g.sample.run(seed1).first, true);
-        expect(g.sample.run(seed2).first, false);
+        expect(g.sample.run(seed1).item1, true);
+        expect(g.sample.run(seed2).item1, false);
       });
 
       test('chooseInt generates integers in range', () async {

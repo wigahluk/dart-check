@@ -1,9 +1,12 @@
-import 'package:dartcheck/pair.dart';
+import 'package:tuple/tuple.dart';
 import 'package:dartcheck/rand.dart';
 import 'package:shuttlecock/shuttlecock.dart';
 
-///
-typedef Pair<T, Rand> RunState<T>(Rand rand);
+/// a convenience alias for runner functions
+typedef Tuple2<T, Rand> RunState<T>(Rand rand);
+
+/// Map acting on the first coordinate
+Tuple2<C, B> mapFirst<A, B, C>(Tuple2<A, B> pair, Function1<A, C> f) => new Tuple2(f(pair.item1), pair.item2);
 
 /// Represents a random execution context
 ///
@@ -18,20 +21,20 @@ class RandomState<T> extends Monad<T> {
   RandomState(this.run);
 
   /// Monadic unit
-  factory RandomState.unit(T t) => new RandomState((r) => new Pair(t, r));
+  factory RandomState.unit(T t) => new RandomState((r) => new Tuple2(t, r));
 
   @override
   RandomState<U> app<U>(RandomState<Function1<T, U>> app) =>
       new RandomState((ran) {
         final pState = run(ran);
-        return app.run(pState.second).mapFirst((f) => f(pState.first));
+        return mapFirst(app.run(pState.item2), (f) => f(pState.item1));
       });
 
   @override
   RandomState<U> flatMap<U>(Function1<T, RandomState<U>> f) =>
       new RandomState((ran) {
         final p = run(ran);
-        return f(p.first).run(p.second);
+        return f(p.item1).run(p.item2);
       });
 
   @override
@@ -48,7 +51,7 @@ class RandomState<T> extends Monad<T> {
       new RandomState((ran) {
         final delta = max - min;
         final p = ran.doubleValue();
-        return new Pair(p.first * delta + min, p.second);
+        return new Tuple2(p.item1 * delta + min, p.item2);
       });
 
   /// Returns a new RandomState for non integers in a range.

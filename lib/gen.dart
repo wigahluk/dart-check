@@ -31,8 +31,8 @@ class Gen<T> extends Monad<T> {
 
   /// Generates an infinite stream of vales given a generator and a random seed.
   StreamMonad<T> toStream(Rand r) => new StreamMonad.unfoldOf(
-          sample.run(r), (p) => new Option(sample.run(p.second)))
-      .map((p) => p.first);
+          sample.run(r), (p) => new Option(sample.run(p.item2)))
+      .map((p) => p.item1);
 
   ///------------///
   /// Generators ///
