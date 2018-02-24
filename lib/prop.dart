@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dartcheck/gen.dart';
-import 'package:dartcheck/pair.dart';
+import 'package:tuple/tuple.dart';
 import 'package:dartcheck/rand.dart';
 import 'package:shuttlecock/shuttlecock.dart';
 import 'package:test/test.dart' as dart_test;
@@ -81,15 +81,15 @@ class _TestShrinker<T> {
       count <= 0
           ? new FutureMonad.of(t)
           : improveStep(t).map((p) =>
-              p.second.isEmpty ? p.first : improve(p.second.first, count - 1));
+              p.item2.isEmpty ? p.item1 : improve(p.item2.first, count - 1));
 
-  FutureMonad<Pair<_TestFailure<T>, Option<_TestFailure<T>>>> improveStep(
+  FutureMonad<Tuple2<_TestFailure<T>, Option<_TestFailure<T>>>> improveStep(
           _TestFailure<T> t) =>
       gen
           .shrink(t.value)
           .map(runOnce)
           .firstWhere((o) => o.isNotEmpty, defaultValue: () => new None())
-          .map((o) => new Pair(t, o));
+          .map((o) => new Tuple2(t, o));
 
   Option<_TestFailure<T>> runOnce(T t) {
     try {

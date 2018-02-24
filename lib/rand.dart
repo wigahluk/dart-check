@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:dartcheck/pair.dart';
+import 'package:tuple/tuple.dart';
 
 /// Represents a random generator based on the Dart Random class
 class Rand {
@@ -17,20 +17,20 @@ class Rand {
       identical(this, other) || other is Rand && other._seed == _seed;
 
   /// Produces a boolean with a new generator
-  Pair<bool, Rand> boolValue() => new Pair(_nextBool(), next());
+  Tuple2<bool, Rand> boolValue() => new Tuple2(_nextBool(), next());
 
   /// Produces a int in range with a new generator
-  Pair<int, Rand> chooseInt(int min, int max) =>
-      new Pair(_nextValueInRange(min, max), next());
+  Tuple2<int, Rand> chooseInt(int min, int max) =>
+      new Tuple2(_nextValueInRange(min, max), next());
 
   /// Produces a double with a new generator
-  Pair<double, Rand> doubleValue() => new Pair(_nextDouble(), next());
+  Tuple2<double, Rand> doubleValue() => new Tuple2(_nextDouble(), next());
 
   /// Produces the next Random generator
   Rand next() => new Rand(seed: _nextValue());
 
   /// Produces the state of this generator
-  Pair<int, Rand> value() => new Pair(_seed, next());
+  Tuple2<int, Rand> value() => new Tuple2(_seed, next());
 
   bool _nextBool() => _seededRandom().nextBool();
 
