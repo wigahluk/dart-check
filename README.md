@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/wigahluk/dart-check.svg?branch=master)](https://travis-ci.org/wigahluk/dart-check)
+
 dart-check
 ==========
 
@@ -34,7 +36,7 @@ _For all `a` and `b`, if `c == divide(a, b)` then `a == c * b`_
 In the _property-based testing_ jargon, a property is basically an executable specification and you may write something like:
 
 ```dart
-forAll(Gen.tuple2(Gen.double, Gen.double)).test('divide and multiply', (pair) {
+forAll(Gen.zip2(Gen.double, Gen.double)).test('divide and multiply', (pair) {
   final c = divide(pair.item1, pair.item2) * pair.item2;
   expect(c, pair.item1);
 });

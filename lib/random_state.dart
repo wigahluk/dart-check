@@ -1,12 +1,13 @@
-import 'package:tuple/tuple.dart';
 import 'package:dartcheck/rand.dart';
 import 'package:shuttlecock/shuttlecock.dart';
+import 'package:tuple/tuple.dart';
+
+/// Map acting on the first coordinate
+Tuple2<C, B> mapFirst<A, B, C>(Tuple2<A, B> pair, Function1<A, C> f) =>
+    new Tuple2(f(pair.item1), pair.item2);
 
 /// a convenience alias for runner functions
 typedef Tuple2<T, Rand> RunState<T>(Rand rand);
-
-/// Map acting on the first coordinate
-Tuple2<C, B> mapFirst<A, B, C>(Tuple2<A, B> pair, Function1<A, C> f) => new Tuple2(f(pair.item1), pair.item2);
 
 /// Represents a random execution context
 ///
