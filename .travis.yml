@@ -1,0 +1,8 @@
+language: dart
+dart:
+- "dev/release/2.0.0-dev.20.0"
+
+dart_task:
+- test
+- dartanalyzer: --fatal-warnings lib
+- dartfmt
