@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:dartcheck/gen.dart';
-import 'package:tuple/tuple.dart';
 import 'package:dartcheck/rand.dart';
 import 'package:shuttlecock/shuttlecock.dart';
 import 'package:test/test.dart' as dart_test;
+import 'package:tuple/tuple.dart';
 
 /// Returns a new Prop that can be used to run tests for a generator
 Prop forAll<T>(Gen<T> gen) => new Prop(gen);
@@ -77,11 +77,11 @@ class _TestShrinker<T> {
   final Gen<T> gen;
   _TestShrinker(this.testBody, this.gen);
 
-  FutureMonad<_TestFailure<T>> improve(_TestFailure<T> t, int count) =>
-      count <= 0
-          ? new FutureMonad.of(t)
-          : improveStep(t).map((p) =>
-              p.item2.isEmpty ? p.item1 : improve(p.item2.first, count - 1));
+  FutureMonad<_TestFailure<T>> improve(_TestFailure<T> t, int count) => count <=
+          0
+      ? new FutureMonad.of(t)
+      : improveStep(t).map(
+          (p) => p.item2.isEmpty ? p.item1 : improve(p.item2.first, count - 1));
 
   FutureMonad<Tuple2<_TestFailure<T>, Option<_TestFailure<T>>>> improveStep(
           _TestFailure<T> t) =>
