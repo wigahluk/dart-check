@@ -1,8 +1,8 @@
 import 'package:dartcheck/gen.dart';
-import 'package:tuple/tuple.dart';
 import 'package:dartcheck/rand.dart';
 import 'package:shuttlecock/shuttlecock.dart';
 import 'package:test/test.dart';
+import 'package:tuple/tuple.dart';
 
 import 'testing_functions.dart';
 
@@ -268,6 +268,15 @@ void main() {
           expect(v.length, 1);
         }
       });
+
+      test('alphaChar generates one non numeric chars', () async {
+        final seed = new Rand();
+        final values = await Gen.alphaChar().toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v, matches('[a-z]|[A-Z]'));
+          expect(v.length, 1);
+        }
+      });
     });
 
     group('String Generators', () {
@@ -294,6 +303,70 @@ void main() {
             await Gen.alphaLowerStr().toStream(seed).take(100).toList();
         for (var v in values) {
           expect(v, matches('^[a-z]*\$'));
+        }
+      });
+
+      test('Alpha string', () async {
+        final seed = new Rand();
+        final values = await Gen.alphaStr().toStream(seed).take(100).toList();
+        for (var v in values) {
+          expect(v, matches('^([a-z]|[A-Z])*\$'));
+        }
+      });
+    });
+
+    group('Zip Generators', () {
+      test('zip2 generates tuples', () async {
+        final seed = new Rand();
+        final values = await Gen
+            .zip2(Gen.chooseInt(1, 11), Gen.alphaLowerStr())
+            .toStream(seed)
+            .take(100)
+            .toList();
+        for (var v in values) {
+          expect(v.item1, greaterThanOrEqualTo(1));
+          expect(v.item1, lessThan(11));
+          expect(v.item2, matches('^[a-z]*\$'));
+        }
+      });
+
+      test('zip2With with projection', () async {
+        final seed = new Rand();
+        final values = await Gen
+            .zip2With(
+                Gen.chooseInt(1, 11), Gen.chooseInt(11, 21), (a, b) => a * b)
+            .toStream(seed)
+            .take(100)
+            .toList();
+        for (var v in values) {
+          expect(v, greaterThanOrEqualTo(11));
+          expect(v, lessThan(200));
+        }
+      });
+    });
+
+    group('One of', () {
+      test('Iterable', () async {
+        final seed = new Rand();
+        final values = await Gen.oneOf([1, 2, 3]).toStream(seed).toList();
+        expect(values.length, 3);
+        expect(values, unorderedMatches([1, 2, 3]));
+      });
+    });
+
+    group('Frecuency', () {
+      test('Frecuancy 2', () async {
+        final seed = new Rand();
+        final values = await Gen
+            .frequency2(1, Gen.cnst(1), 2, Gen.cnst(2))
+            .toStream(seed)
+            .take(100)
+            .toList();
+        final ones = values.where((n) => n == 1).length;
+        final twos = values.length - ones;
+        for (var v in values) {
+          expect(v, isIn([1, 2]));
+          expect(twos / ones, closeTo(2, 0.6));
         }
       });
     });

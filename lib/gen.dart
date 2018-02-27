@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:dartcheck/rand.dart';
 import 'package:dartcheck/random_state.dart';
 import 'package:shuttlecock/shuttlecock.dart';
+import 'package:tuple/tuple.dart';
 
 /// A monadic wrapper for a random state used to generate random values.
 class Gen<T> extends Monad<T> {
@@ -34,6 +36,10 @@ class Gen<T> extends Monad<T> {
           sample.run(r), (p) => new Option(sample.run(p.item2)))
       .map((p) => p.item1);
 
+  /// Returns a generator for alpha chars.
+  static Gen<String> alphaChar() =>
+      frequency2(1, alphaUpperChar(), 9, alphaLowerChar());
+
   ///------------///
   /// Generators ///
   ///------------///
@@ -46,6 +52,10 @@ class Gen<T> extends Monad<T> {
   /// Returns a generator for lower case alpha strings.
   static Gen<String> alphaLowerStr([int size = 100]) =>
       listOfN(alphaLowerChar(), size + 1).map((chars) => chars.join(''));
+
+  /// Returns a generator for alpha strings.
+  static Gen<String> alphaStr([int size = 100]) =>
+      listOfN(alphaChar(), size + 1).map((chars) => chars.join(''));
 
   /// Returns a generator for upper case alpha characters.
   static Gen<String> alphaUpperChar() =>
@@ -72,6 +82,26 @@ class Gen<T> extends Monad<T> {
   /// A static wrapper for unit constructor.
   static Gen<S> cnst<S>(S s) => new _GenConst(s);
 
+  /// Returns a generator which uses as a source one of the generators provided
+  /// based on the probability inferred from the given frequencies.
+  static Gen<T> frequency<T>(Iterable<Tuple2<int, Gen<T>>> gens) {
+    final filteredGens = gens.where((pair) => pair.item1 > 0).toList();
+    var sum = 0;
+    final map = new SplayTreeMap<int, Gen<T>>();
+    for (var pair in filteredGens) {
+      sum = pair.item1 + sum;
+      map[sum] = pair.item2;
+    }
+    return Gen.chooseInt(0, sum).flatMap((n) => map[map.firstKeyAfter(n)]);
+  }
+
+  /// Returns a generator which uses as a source one of two generators based on
+  /// a probability inferred from the given frequencies.
+  ///
+  /// This is a shortcut for using frequency method and providing two tuples.
+  static Gen<T> frequency2<T>(int frec1, Gen<T> gen1, int frec2, Gen<T> gen2) =>
+      frequency([new Tuple2(frec1, gen1), new Tuple2(frec2, gen2)]);
+
   /// Returns a generator of lists of T with at most a limit number of elements
   /// given a Generator.
   static Gen<List<T>> listOfN<T>(Gen<T> gen, int limit) =>
@@ -87,6 +117,9 @@ class Gen<T> extends Monad<T> {
   static Gen<String> numStr([int size = 100]) =>
       listOfN(numChar(), size + 1).map((chars) => chars.join(''));
 
+  /// Returns a generator of T given an iterable of T's.
+  static Gen<T> oneOf<T>(Iterable<T> ts) => new _GenOneOf(ts);
+
   /// Returns a generator given a collection of generators
   static Gen<List<T>> sequence<T>(Iterable<Gen<T>> gens) => gens.isEmpty
       ? cnst([])
@@ -96,6 +129,16 @@ class Gen<T> extends Monad<T> {
                 ts.add(t2);
                 return ts;
               })));
+
+  /// Returns a generator of Tuple<T1, T2> given two generators for T1 and T2.
+  static Gen<Tuple2<T1, T2>> zip2<T1, T2>(Gen<T1> gen1, Gen<T2> gen2) =>
+      zip2With(gen1, gen2, (t1, t2) => new Tuple2(t1, t2));
+
+  /// Returns a generator of S given two generators for T1 and T2 and a
+  /// projection function.
+  static Gen<S> zip2With<T1, T2, S>(
+          Gen<T1> gen1, Gen<T2> gen2, Function2<T1, T2, S> projection) =>
+      gen1.flatMap((t1) => gen2.map((t2) => projection(t1, t2)));
 }
 
 class _GenBool extends Gen<bool> {
@@ -155,4 +198,15 @@ class _GenIntInRange extends Gen<int> {
     final newStep = ((target + step) / 2).ceil();
     return newStep >= target ? new None() : new Some(newStep);
   }
+}
+
+class _GenOneOf<T> extends Gen<T> {
+  final Iterable<T> _source;
+  _GenOneOf(Iterable<T> ts)
+      : this._source = ts,
+        super(RandomState.choseInt(0, ts.length).map((n) => ts.elementAt(n)));
+
+  @override
+  StreamMonad<T> toStream(Rand r) =>
+      new StreamMonad(new Stream.fromIterable(_source));
 }
